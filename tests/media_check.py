@@ -49,8 +49,14 @@ def main():
         assert len(snap["streaming"]["sessions"]) == 3
         assert snap["streaming"]["more"] == 2
         assert snap["streaming"]["state"] == "LIVE"
-        assert all(len(row["user"]) <= 32 for row in snap["streaming"]["sessions"])
-        assert all(len(row["title"]) <= 96 for row in snap["streaming"]["sessions"])
+        sessions = snap["streaming"]["sessions"]
+        assert all(len(row["user"]) <= 32 for row in sessions)
+        assert all(len(row["title"]) <= 96 for row in sessions)
+        assert [row["title"] for row in sessions] == [
+            "Example Series · S02E05",
+            "Example Movie",
+            "Second Series · S01E02",
+        ]
 
         assert snap["activity"]["primary"] == "nzbget"
         nzb = snap["activity"]["sources"]["nzbget"]

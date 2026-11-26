@@ -40,7 +40,7 @@ The user chose option 2 but wants it on one screen, so the two-page stream/downl
 
 | Region | Content |
 | --- | --- |
-| `STREAMING` (left) | `N STREAMING`; up to three active Jellyfin sessions as `USER · DIRECT/TRANSCODE · bitrate` then `SxxExx or TITLE`, then client. `+N MORE` when there are more. |
+| `STREAMING` (left) | `N STREAMING`; up to three active Jellyfin sessions as `USER · DIRECT/TRANSCODE · bitrate` then `SERIES · SxxExx` (or the movie title), then client. `+N MORE` when there are more. |
 | `ACTIVITY` (middle) | One adaptive panel: compare qBittorrent `dl_info_speed` with the NZBGet 64-bit `DownloadRate`; the higher one is primary and shows rate, top item, progress bar and ETA/status (`PP` for post-processing). The lower one is a dim secondary line with its own rate and queue/disk summary. If both are zero, show `IDLE`. |
 | `ERRORS / STATUS` (right) | One row per source — Prowlarr, Sonarr, Radarr, NZBGet, qBittorrent — with a current-state badge and a `NEW n` counter. Prowlarr: health warnings/errors and failing indexers. Sonarr/Radarr: `wanted/missing` total, failed queue items and `health` warnings. NZBGet: `systemhealth` alerts plus new `WARNING`/`ERROR` log entries seen since the last tick. qBittorrent: errored torrent count and non-nominal `connection_status`. A `new since 00:00` line makes the accumulation explicit. |
 | `LATEST` (bottom strip) | Three most recent Sonarr/Radarr import events: `S/M · TITLE · relative time`. Falls back to downloader completion history when arr data is unavailable. |

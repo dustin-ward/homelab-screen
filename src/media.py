@@ -837,11 +837,11 @@ class MediaService:
                 code = f"S{season:02d}E{episode:02d}"
             name = playing.get("Name") or playing.get("SeriesName") or "Untitled"
             series = playing.get("SeriesName") or ""
-            title = " · ".join(
-                part for part in (code, name) if part
-            ) if code else text(name, 90)
-            if series and not code:
-                title = text(f"{series} · {name}", 90)
+            if series:
+                title = " · ".join(part for part in (series, code) if part)
+            else:
+                title = name
+            title = text(title, 90)
             client = " · ".join(
                 part
                 for part in (
@@ -1324,7 +1324,7 @@ class MediaService:
                 "method": "DIRECT",
                 "rate_bps": 8_200_000,
                 "rate_text": "8.2 Mb/s",
-                "title": "S02E05 · The Long Example",
+                "title": "Example Series · S02E05",
                 "series": "Example Series",
                 "client": "Web · Chrome",
             },
@@ -1342,7 +1342,7 @@ class MediaService:
                 "method": "DIRECT",
                 "rate_bps": 1_700_000,
                 "rate_text": "1.7 Mb/s",
-                "title": "S01E02 · Another Example",
+                "title": "Second Series · S01E02",
                 "series": "Second Series",
                 "client": "TV · Android",
             },
