@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Prototype: static mock of page 1 CORE at exactly 1280x400. Fake data only; no API, no persistence. -->
+<!-- Homelab-screen kiosk: fixed 1280x400 CORE + SCREENSAVER pages, fed by the local snapshot collector. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -98,9 +98,10 @@
   .unit { color: var(--dim); font-size: 12px; }
   .dim { color: var(--dim); font-size: 12px; white-space: nowrap; }
   .bar { color: var(--fg); white-space: pre; }
-  .spark { white-space: pre; max-width: 100%; color: var(--fg); font-size: 13px; line-height: 16px; }
+  .spark { display: block; white-space: pre; max-width: 100%; overflow: hidden; color: var(--fg); font-size: 13px; line-height: 16px; }
   .spark.up { color: var(--dim); }
-  .spark.tall { font-size: 16px; line-height: 20px; }
+  /* 60 glyphs at 13px mono fit the 599px panel content box; 16px did not. */
+  .spark.tall { font-size: 13px; line-height: 18px; }
   .spark.small { font-size: 12px; line-height: 15px; color: var(--dim); }
   .spark.tiny { font-size: 12px; line-height: 15px; color: var(--dim); }
   .stack { display: flex; flex-direction: column; gap: 1px; }

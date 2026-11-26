@@ -40,6 +40,21 @@ if grep -nE '%[hU]' "$ROOT"/src/*.service; then
   fail "systemd %h/%U resolve against the manager user, not User="
 fi
 
+echo "== chart width budget =="
+python3 - "$ROOT/src/kiosk.html" <<'PY'
+import re
+import sys
+
+html = open(sys.argv[1], encoding="utf-8").read()
+base = re.search(r"\.spark\s*\{([^}]*)\}", html)
+assert base and "overflow: hidden" in base.group(1), "sparklines must clip, not overflow"
+tall = re.search(r"\.spark\.tall\s*\{([^}]*)\}", html)
+assert tall, "missing .spark.tall rule"
+size = re.search(r"font-size:\s*(\d+)px", tall.group(1))
+assert size, "missing font-size in .spark.tall"
+assert int(size.group(1)) <= 13, "60-glyph sparklines need <= 13px to fit the panel"
+PY
+
 echo "== stub snapshot smoke test =="
 export HOMELAB_CONFIG_HOME="$TMP/config"
 export HOMELAB_APP_HOME="$TMP/app"
