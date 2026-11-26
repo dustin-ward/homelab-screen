@@ -100,11 +100,19 @@
   .bar { color: var(--fg); white-space: pre; }
   .spark { display: block; white-space: pre; max-width: 100%; overflow: hidden; color: var(--fg); font-size: 13px; line-height: 16px; }
   .spark.up { color: var(--dim); }
-  /* 60 glyphs at 13px mono fit the 599px panel content box; 16px did not. */
-  .spark.tall { font-size: 13px; line-height: 18px; }
   .spark.small { font-size: 12px; line-height: 15px; color: var(--dim); }
   .spark.tiny { font-size: 12px; line-height: 15px; color: var(--dim); }
-  .stack { display: flex; flex-direction: column; gap: 1px; }
+  /* The stack fills the panel so its chart can claim every pixel the readouts
+     leave behind; fixed rows keep their natural height instead of shrinking. */
+  .stack { display: flex; flex-direction: column; gap: 1px; height: 100%; min-height: 0; }
+  .stack > * { flex: none; }
+  /* CORE charts grow to fill the panel height left over by their readouts.
+     One column per sample, 8 block levels per text row; 14px rows keep
+     adjacent block glyphs contiguous so a filled column reads as one bar.
+     60 glyphs at 13px mono fit the 599px panel content box; 16px did not. */
+  .chart { display: flex; flex-direction: column; justify-content: flex-end; flex: 1 0 auto; min-height: 0; max-width: 100%; overflow: hidden; color: var(--fg); }
+  .chart.up { color: var(--dim); }
+  .chart-row { display: block; flex: none; white-space: pre; overflow: hidden; font-size: 13px; line-height: 14px; }
   .bottombar { gap: 12px; }
   .nav {
     appearance: none;
@@ -483,7 +491,7 @@
       <div class="stack">
         <div class="row"><span class="hero value" id="cpu-pct">31.2%</span><span class="label" id="cores">8 CORES</span></div>
         <div class="row"><span class="label">LOAD 1/5/15</span><span class="value" id="load">0.42&nbsp;&nbsp;0.51&nbsp;&nbsp;0.60</span></div>
-        <div class="spark tall" data-spark="cpu">▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▁▂▃▄</div>
+        <div class="chart" data-spark="cpu" data-rows="4"><div class="chart-row">▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▁▂▃▄</div></div>
         <div class="dim">60s &middot; CPU</div>
       </div>
     </article>
@@ -508,8 +516,8 @@
           <span class="label">&#8595; DOWN</span><span class="hero value" id="down">84.2</span><span class="unit">Mbit/s</span>
           <span class="label">&#8593; UP</span><span class="hero value" id="up">12.6</span><span class="unit">Mbit/s</span>
         </div>
-        <div class="spark tall" data-spark="down">▃▄▅▆▅▇█▆▅▄▃▄▆▇█▇▆▅▄▃▂▃▄▅▆▇██▇▆▅▄▃▂▃▄▅▆▇▆▅▄▃▂▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▁</div>
-        <div class="spark tall up" data-spark="up">▂▂▃▃▂▃▄▃▂▂▃▄▅▄▃▂▂▃▃▂▂▃▄▃▂▂▃▄▃▂▂▂▃▃▄▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂</div>
+        <div class="chart" data-spark="down" data-rows="3"><div class="chart-row">▃▄▅▆▅▇█▆▅▄▃▄▆▇█▇▆▅▄▃▂▃▄▅▆▇██▇▆▅▄▃▂▃▄▅▆▇▆▅▄▃▂▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▁</div></div>
+        <div class="chart up" data-spark="up" data-rows="2"><div class="chart-row">▂▂▃▃▂▃▄▃▂▂▃▄▅▄▃▂▂▃▃▂▂▃▄▃▂▂▃▄▃▂▂▂▃▃▄▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂</div></div>
         <div class="dim">60s &middot; down / up</div>
       </div>
     </article>
@@ -627,7 +635,12 @@
     const degraded = j.mode !== "live";
     $("mode").textContent = degraded ? "DEGRADED" : "NOMINAL";
     $("status").classList.toggle("degraded", degraded);
-    sparks.forEach(sp => { sp.el.textContent = j.sparks[sp.key] || sp.el.textContent; });
+    sparks.forEach(sp => {
+      const text = j.sparks[sp.key];
+      if (!text) return;
+      sp.levels = [...text].map(ch => clamp(BLOCKS.indexOf(ch), 0, 7));
+      paintSpark(sp);
+    });
     const u = j.uptime, d = Math.floor(u / 86400), h = Math.floor((u % 86400) / 3600), m = Math.floor((u % 3600) / 60);
     const upText = d + "d " + String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
     $("uptime").textContent = upText;
@@ -814,6 +827,7 @@
   const sparks = [...document.querySelectorAll("[data-spark]")].map(el => ({
     el,
     key: el.dataset.spark,
+    rows: parseInt(el.dataset.rows || "1", 10),
     levels: [...el.textContent].map(ch => clamp(BLOCKS.indexOf(ch), 0, 7)),
     base: parseFloat(el.dataset.base || "3")
   }));
@@ -821,10 +835,50 @@
   const state = { cpu: 31, load: 0.42, ram: 2.1, swap: 118, arc: 1.2,
                   down: 84, up: 12, rootfs: 42, uptime: 42 * 86400 + 6 * 3600 + 12 * 60 };
 
+  // One column per sample, 8 block levels per text row: a 4-row chart resolves
+  // 32 heights inside the same monospace character grid the rest of the page uses.
+  // CORE charts scale to the peak of their own window so the plot always fills
+  // the panel instead of hugging the baseline at low load.
+  function chartRows(levels, rows, peak) {
+    const span = rows * 8 - 1;
+    const top = Math.max(1, peak || 7);
+    // An idle sample still has to draw a line: at one sub-cell it is a 1.7px
+    // sliver, which disappears at wall-screen distance. Two sub-cells keeps a
+    // baseline. Single-row sparklines keep the exact 8-level glyph mapping.
+    const floor = rows > 1 ? 2 : 1;
+    const out = [];
+    for (let row = rows - 1; row >= 0; row--) {
+      let line = "";
+      for (const level of levels) {
+        const filled = floor + Math.round(level / top * (span + 1 - floor));
+        const sub = clamp(filled - row * 8, 0, 8);
+        line += sub ? BLOCKS[sub - 1] : " ";
+      }
+      out.push(line);
+    }
+    return out;
+  }
+
+  function paintSpark(s) {
+    const peak = s.rows > 1 ? Math.max(3, ...s.levels) : 7;
+    const lines = chartRows(s.levels, s.rows, peak);
+    if (s.rows === 1) { s.el.textContent = lines[0]; return; }
+    if (s.el.children.length !== lines.length) {
+      s.el.replaceChildren(...lines.map(text => {
+        const row = document.createElement("div");
+        row.className = "chart-row";
+        row.textContent = text;
+        return row;
+      }));
+    } else {
+      lines.forEach((text, i) => { s.el.children[i].textContent = text; });
+    }
+  }
+
   function renderSpark(s) {
     s.levels.shift();
     s.levels.push(clamp(Math.round(walk(s.levels[s.levels.length - 1], 1.1, 0, 7)), 0, 7));
-    s.el.textContent = s.levels.map(i => BLOCKS[i]).join("");
+    paintSpark(s);
   }
 
   const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
