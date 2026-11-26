@@ -1,0 +1,616 @@
+<!doctype html>
+<!-- Prototype: static mock of page 1 CORE at exactly 1280x400. Fake data only; no API, no persistence. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Homelab screen — 1280×400</title>
+<style>
+  :root {
+    --bg: #000000;
+    --fg: #e8e8e8;
+    --dim: #8a8a8a;
+    --border: #444444;
+    --accent: #b22222;   /* dark red: server identity and panel titles */
+    --ok: #00aa00;       /* NOMINAL status indicator */
+    --warn: #b36000;
+    --crit: #a31621;
+  }
+  * { box-sizing: border-box; }
+  html, body, body * { cursor: none !important; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--fg);
+    overflow: hidden;
+  }
+  .screen {
+    position: relative;
+    isolation: isolate;
+    width: 1280px;
+    height: 400px;
+    padding: 8px;
+    background: var(--bg);
+    display: grid;
+    grid-template-rows: 44px 1fr 48px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  #bg-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .topbar, .bottombar {
+    position: relative;
+    z-index: 2;
+    background: rgba(0, 0, 0, .64);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    min-width: 0;
+  }
+  .topbar { gap: 26px; }
+  .brand { font-weight: 700; letter-spacing: 1px; color: var(--fg); }
+  .brand::before { content: "\25A0 "; color: var(--accent); }
+  .status { color: var(--fg); letter-spacing: 1px; }
+  .status .dot { color: var(--ok); }
+  .status.degraded, .status.degraded .dot { color: var(--warn); }
+  .meta { margin-left: auto; display: flex; gap: 26px; color: var(--dim); }
+  .clock { color: var(--fg); }
+  .grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    min-height: 0;
+  }
+  .panel {
+    position: relative;
+    background: rgba(0, 0, 0, .58);
+    border: 1px solid var(--border);
+    padding: 14px 14px 8px;
+    min-width: 0;
+    min-height: 0;
+  }
+  .panel-title {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    padding: 0 6px;
+    background: var(--bg);
+    color: var(--accent);
+    font-size: 13px;
+    line-height: 15px;
+    letter-spacing: 1px;
+  }
+  .row { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  .label { color: var(--dim); }
+  .value { color: var(--fg); }
+  .hero { font-size: 18px; line-height: 22px; }
+  .unit { color: var(--dim); font-size: 12px; }
+  .dim { color: var(--dim); font-size: 12px; white-space: nowrap; }
+  .bar { color: var(--fg); white-space: pre; }
+  .spark { white-space: pre; max-width: 100%; color: var(--fg); font-size: 13px; line-height: 16px; }
+  .spark.up { color: var(--dim); }
+  .spark.tall { font-size: 16px; line-height: 20px; }
+  .spark.small { font-size: 12px; line-height: 15px; color: var(--dim); }
+  .spark.tiny { font-size: 12px; line-height: 15px; color: var(--dim); }
+  .stack { display: flex; flex-direction: column; gap: 1px; }
+  .bottombar { gap: 12px; }
+  .nav {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font: inherit;
+    font-size: 14px;
+    width: 64px;
+    height: 44px;
+    letter-spacing: 0;
+  }
+  .nav:hover, .nav:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+  .page { letter-spacing: 1px; }
+  .foot-right { margin-left: auto; color: var(--fg); }
+
+  /* Dormant emphasis styles for the rejected CPU/MEM/NET/DISK pages; not in PAGES. */
+  body[data-page="cpu"] .panel.net, body[data-page="cpu"] .panel.disk,
+  body[data-page="mem"] .panel.net, body[data-page="mem"] .panel.disk,
+  body[data-page="net"] .panel.cpu, body[data-page="net"] .panel.mem,
+  body[data-page="disk"] .panel.cpu, body[data-page="disk"] .panel.mem { display: none; }
+  body[data-page="cpu"] .panel.cpu, body[data-page="cpu"] .panel.mem,
+  body[data-page="mem"] .panel.cpu, body[data-page="mem"] .panel.mem,
+  body[data-page="net"] .panel.net, body[data-page="net"] .panel.disk,
+  body[data-page="disk"] .panel.net, body[data-page="disk"] .panel.disk { grid-column: 1 / -1; }
+  body[data-page="mem"] .panel.mem { grid-row: 1; }
+  body[data-page="mem"] .panel.cpu { grid-row: 2; }
+  body[data-page="disk"] .panel.disk { grid-row: 1; }
+  body[data-page="disk"] .panel.net { grid-row: 2; }
+
+  /* Screensaver page: deep-field aurora, part of the rotation. */
+  .screensaver-page {
+    display: none;
+    position: relative;
+    z-index: 2;
+    grid-row: 2;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: transparent;
+  }
+  body[data-page="ss"] .grid { display: none; }
+  body[data-page="ss"] .screensaver-page { display: block; }
+  .ss-hud {
+    position: absolute; z-index: 2; left: 48px; top: 30px; width: 620px;
+    pointer-events: none;
+    text-shadow: 0 0 10px #000, 0 0 3px #000;
+  }
+  .ss-kicker { color: var(--accent); font-size: 11px; letter-spacing: 3px; }
+  .ss-clock {
+    display: flex; align-items: baseline; margin-top: 10px;
+    color: #d0d0d0; text-shadow: 0 0 16px #000, 0 0 4px #000;
+  }
+  .ss-time { font-size: 92px; line-height: 96px; letter-spacing: 2px; }
+  .ss-sec { font-size: 26px; line-height: 26px; color: var(--dim); margin-left: 8px; }
+  .ss-ampm { font-size: 20px; color: var(--accent); margin-left: 12px; letter-spacing: 2px; }
+  .ss-date { margin-top: 2px; font-size: 14px; letter-spacing: 3px; color: var(--dim); }
+  .ss-status { margin-top: 14px; font-size: 11px; letter-spacing: 2px; color: var(--dim); }
+  .ss-status .dot { color: var(--ok); }
+  .ss-fx-label {
+    position: absolute; z-index: 2; right: 34px; bottom: 16px; width: 260px; text-align: center;
+    font-size: 11px; letter-spacing: 2px; color: var(--dim); pointer-events: none;
+    text-shadow: 0 0 8px #000, 0 0 2px #000;
+  }
+  .ss-vignette {
+    position: absolute; z-index: 1; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 45%, transparent 42%, rgba(0,0,0,.38) 100%);
+  }
+</style>
+</head>
+<body>
+<main class="screen">
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <div class="brand" id="brand">HOMELAB</div>
+    <div class="status" id="status"><span class="dot">&#9632;</span> <span id="mode">NOMINAL</span></div>
+    <div class="meta">
+      <span>14 GUESTS</span>
+      <span id="up-meta">UP 42d 06:12</span>
+      <span class="clock" id="clock">TUE NOV 25 &middot; 10:52:03 PM</span>
+    </div>
+  </header>
+
+  <section class="grid">
+    <article class="panel cpu">
+      <div class="panel-title">CPU</div>
+      <div class="stack">
+        <div class="row"><span class="hero value" id="cpu-pct">31.2%</span><span class="label" id="cores">8 CORES</span></div>
+        <div class="row"><span class="label">LOAD 1/5/15</span><span class="value" id="load">0.42&nbsp;&nbsp;0.51&nbsp;&nbsp;0.60</span></div>
+        <div class="spark tall" data-spark="cpu">▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▁▂▃▄</div>
+        <div class="dim">60s &middot; CPU</div>
+      </div>
+    </article>
+
+    <article class="panel mem">
+      <div class="panel-title">MEMORY</div>
+      <div class="stack">
+        <div class="row"><span class="label">RAM</span><span class="value" id="ram">2.1G / 7.8G</span><span class="dim" id="ram-pct">27%</span></div>
+        <div class="bar" id="bar-ram">█████████░░░░░░░░░░░░░░░░░░░░░</div>
+        <div class="row"><span class="label">SWAP</span><span class="value" id="swap">118M / 512M</span><span class="dim" id="swap-pct">23%</span></div>
+        <div class="bar" id="bar-swap">███████░░░░░░░░░░░░░░░░░░░░░░░░░</div>
+        <div class="dim">ZFS ARC <span id="arc">1.2G</span></div>
+        <div class="spark small" data-spark="ram">▂▂▃▃▄▄▅▅▆▆▅▅▄▄▃▃▄▄▅▅▆▆▇▇▆▆▅▅▄▄▃▃▄▄▅▅▆▆▅▅</div>
+        <div class="dim">40s &middot; RAM used</div>
+      </div>
+    </article>
+
+    <article class="panel net">
+      <div class="panel-title">NETWORK</div>
+      <div class="stack">
+        <div class="row">
+          <span class="label">&#8595; DOWN</span><span class="hero value" id="down">84.2</span><span class="unit">Mbit/s</span>
+          <span class="label">&#8593; UP</span><span class="hero value" id="up">12.6</span><span class="unit">Mbit/s</span>
+        </div>
+        <div class="spark tall" data-spark="down">▃▄▅▆▅▇█▆▅▄▃▄▆▇█▇▆▅▄▃▂▃▄▅▆▇██▇▆▅▄▃▂▃▄▅▆▇▆▅▄▃▂▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▁</div>
+        <div class="spark tall up" data-spark="up">▂▂▃▃▂▃▄▃▂▂▃▄▅▄▃▂▂▃▃▂▂▃▄▃▂▂▃▄▃▂▂▂▃▃▄▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂▂▃▃▂▂▃▄▃▂</div>
+        <div class="dim">60s &middot; down / up</div>
+      </div>
+    </article>
+
+    <article class="panel disk">
+      <div class="panel-title">DISK</div>
+      <div class="stack">
+        <div class="row"><span class="label">ROOTFS</span><span class="value" id="rootfs">42G / 128G</span><span class="dim" id="rootfs-pct">33%</span></div>
+        <div class="bar" id="bar-rootfs">██████████░░░░░░░░░░░░░░░░░░░░░</div>
+        <div class="row"><span class="label">UPTIME</span><span class="value" id="uptime">42d 06:12</span></div>
+        <div class="spark tiny" data-spark="read">▁▂▃▅▇▇▆▄▃▂▁▂▄▆▇▇▅▃▂▁▂▃▅▇▆▄▃▂▁▂▄▆▇▇▅▃▂▁▂▃</div>
+        <div class="spark tiny up" data-spark="write">▂▃▄▅▄▃▂▁▂▃▄▅▆▅▄▃▂▁▂▃▄▅▄▃▂▁▂▃▄▅▆▅▄▃▂▁▂▃▄▅</div>
+        <div class="dim">40s &middot; iowait / PSI io</div>
+      </div>
+    </article>
+  </section>
+
+  <section class="screensaver-page" id="ss-page" aria-hidden="true">
+    <div class="ss-hud">
+      <div class="ss-kicker" id="ss-kicker">HOMELAB // DEEP FIELD</div>
+      <div class="ss-clock">
+        <span class="ss-time" id="ss-time">10:52</span>
+        <span class="ss-sec" id="ss-sec">:07</span>
+        <span class="ss-ampm" id="ss-ampm">PM</span>
+      </div>
+      <div class="ss-date" id="ss-date">TUESDAY, NOVEMBER 25</div>
+      <div class="ss-status"><span class="dot">&#9632;</span> LINK NOMINAL &middot; <span id="ss-health">2% CPU &middot; 40% MEM</span></div>
+    </div>
+    <div class="ss-fx-label" id="ss-fx-label">STELLAR WIND &middot; DRIFT</div>
+    <div class="ss-vignette"></div>
+  </section>
+
+  <footer class="bottombar">
+    <button class="nav" id="prev" type="button" aria-label="Previous page">&#91;&#9664;&#93;</button>
+    <div class="page" id="pager">1/2 CORE</div>
+    <button class="nav" id="next" type="button" aria-label="Next page">&#91;&#9654;&#93;</button>
+    <div class="foot-right" id="auto-label">AUTO 15s</div>
+  </footer>
+
+</main>
+
+
+<script>
+(() => {
+  "use strict";
+  const BLOCKS = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
+  function bar(pct) {
+    const n = Math.max(0, Math.min(32, Math.round(pct / 100 * 32)));
+    return "█".repeat(n) + "░".repeat(32 - n);
+  }
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+  const walk = (v, step, lo, hi) => clamp(v + (Math.random() * 2 - 1) * step, lo, hi);
+  const $ = id => document.getElementById(id);
+  let liveData = null;
+
+  function applyLive(j) {
+    $("cpu-pct").textContent = j.cpu.toFixed(1) + "%";
+    $("load").innerHTML = j.load.map(v => v.toFixed(2)).join("&nbsp;&nbsp;");
+    $("ram").textContent = j.ram.toFixed(1) + "G / " + j.ram_total.toFixed(1) + "G";
+    $("ram-pct").textContent = Math.round(j.ram / j.ram_total * 100) + "%";
+    $("swap").textContent = Math.round(j.swap) + "M / " + Math.round(j.swap_total) + "M";
+    $("swap-pct").textContent = Math.round(j.swap / j.swap_total * 100) + "%";
+    $("bar-ram").textContent = bar(j.ram / j.ram_total * 100);
+    $("bar-swap").textContent = bar(j.swap / j.swap_total * 100);
+    $("arc").textContent = j.arc.toFixed(1) + "G";
+    $("down").textContent = j.down.toFixed(1);
+    $("up").textContent = j.up.toFixed(1);
+    $("rootfs").textContent = j.rootfs.toFixed(0) + "G / " + j.rootfs_total.toFixed(0) + "G";
+    $("rootfs-pct").textContent = Math.round(j.rootfs / j.rootfs_total * 100) + "%";
+    $("bar-rootfs").textContent = bar(j.rootfs / j.rootfs_total * 100);
+    $("cores").textContent = j.cores + " CORES";
+    const label = j.host || "HOMELAB";
+    $("brand").textContent = label;
+    $("ss-kicker").textContent = label + " // DEEP FIELD";
+    const degraded = j.mode !== "live";
+    $("mode").textContent = degraded ? "DEGRADED" : "NOMINAL";
+    $("status").classList.toggle("degraded", degraded);
+    sparks.forEach(sp => { sp.el.textContent = j.sparks[sp.key] || sp.el.textContent; });
+    const u = j.uptime, d = Math.floor(u / 86400), h = Math.floor((u % 86400) / 3600), m = Math.floor((u % 3600) / 60);
+    const upText = d + "d " + String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+    $("uptime").textContent = upText;
+    $("up-meta").textContent = "UP " + upText;
+    $("ss-health").textContent = Math.round(j.cpu) + "% CPU · " +
+      Math.round(j.ram / j.ram_total * 100) + "% MEM";
+  }
+
+  const sparks = [...document.querySelectorAll("[data-spark]")].map(el => ({
+    el,
+    key: el.dataset.spark,
+    levels: [...el.textContent].map(ch => clamp(BLOCKS.indexOf(ch), 0, 7)),
+    base: parseFloat(el.dataset.base || "3")
+  }));
+
+  const state = { cpu: 31, load: 0.42, ram: 2.1, swap: 118, arc: 1.2,
+                  down: 84, up: 12, rootfs: 42, uptime: 42 * 86400 + 6 * 3600 + 12 * 60 };
+
+  function renderSpark(s) {
+    s.levels.shift();
+    s.levels.push(clamp(Math.round(walk(s.levels[s.levels.length - 1], 1.1, 0, 7)), 0, 7));
+    s.el.textContent = s.levels.map(i => BLOCKS[i]).join("");
+  }
+
+  const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+  function timeParts(n) {
+    const h24 = n.getHours();
+    return {
+      h: h24 % 12 || 12,
+      mm: String(n.getMinutes()).padStart(2, "0"),
+      ss: String(n.getSeconds()).padStart(2, "0"),
+      ap: h24 < 12 ? "AM" : "PM"
+    };
+  }
+
+  // Shared starfield background; the screensaver adds wide aurora ribbons.
+  const bgCanvas = $("bg-canvas");
+  const bgCtx = bgCanvas.getContext("2d");
+  const TAU = Math.PI * 2;
+  const CONTENT_TOP = 58, CONTENT_H = 286;
+  let bgRAF = null, bgLastFrame = 0, stars = [], dust = [], comet = null, nextComet = 0;
+
+  const AURORA_BANDS = [
+    { cy: CONTENT_TOP + CONTENT_H * 0.20, amp: 24, amp2: 9, thick: 78, freq: 0.0038, speed: 0.10, phase: 0.3, alpha: 0.130, rgb: "178,34,34" },
+    { cy: CONTENT_TOP + CONTENT_H * 0.38, amp: 30, amp2: 12, thick: 96, freq: 0.0031, speed: 0.07, phase: 2.1, alpha: 0.110, rgb: "150,34,44" },
+    { cy: CONTENT_TOP + CONTENT_H * 0.57, amp: 20, amp2: 8, thick: 68, freq: 0.0046, speed: 0.12, phase: 4.2, alpha: 0.120, rgb: "190,60,50" },
+    { cy: CONTENT_TOP + CONTENT_H * 0.76, amp: 34, amp2: 14, thick: 110, freq: 0.0027, speed: 0.055, phase: 1.2, alpha: 0.090, rgb: "130,24,34" }
+  ];
+
+  function buildAuroraGradients() {
+    for (const b of AURORA_BANDS) {
+      const g = bgCtx.createLinearGradient(0, b.cy - b.thick, 0, b.cy + b.thick);
+      g.addColorStop(0, "rgba(" + b.rgb + ",0)");
+      g.addColorStop(0.48, "rgba(" + b.rgb + "," + b.alpha + ")");
+      g.addColorStop(0.55, "rgba(" + b.rgb + "," + (b.alpha * 1.35).toFixed(3) + ")");
+      g.addColorStop(1, "rgba(" + b.rgb + ",0)");
+      b.grad = g;
+    }
+  }
+
+  function bgResize() {
+    const w = bgCanvas.clientWidth || 1280;
+    const h = bgCanvas.clientHeight || 400;
+    const render = 0.4 * (window.devicePixelRatio || 1);
+    bgCanvas.width = Math.round(w * render);
+    bgCanvas.height = Math.round(h * render);
+    bgCtx.setTransform(render, 0, 0, render, 0, 0);
+    buildAuroraGradients();
+    stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: 0.35 + Math.random() * 1.35,
+      v: 0.08 + Math.random() * 0.42,
+      a: Math.random() * TAU,
+      red: Math.random() < 0.07
+    }));
+    dust = Array.from({ length: 42 }, () => ({
+      x: Math.random() * w,
+      y: CONTENT_TOP + Math.random() * CONTENT_H,
+      v: 10 + Math.random() * 30,
+      len: 4 + Math.random() * 18,
+      a: Math.random() * TAU,
+      red: Math.random() < 0.30
+    }));
+  }
+
+  function drawStars(ts, w, h) {
+    const ss = document.body.dataset.page === "ss";
+    // Page 1 stays quieter; the screensaver can carry more sparkle.
+    const gain = ss ? 1.15 : 0.9;
+    for (const s of stars) {
+      const tw = (0.20 + 0.55 * (0.5 + 0.5 * Math.sin(ts / 900 + s.a))) * gain;
+      bgCtx.fillStyle = s.red
+        ? "rgba(178,34,34," + (tw * 0.7).toFixed(3) + ")"
+        : "rgba(220,220,220," + tw.toFixed(3) + ")";
+      bgCtx.beginPath();
+      bgCtx.arc(s.x, s.y, s.r, 0, TAU);
+      bgCtx.fill();
+      s.x -= s.v;
+      if (s.x < -3) { s.x = w + 3; s.y = Math.random() * h; }
+    }
+  }
+
+  function bandY(x, band, t) {
+    return band.cy
+      + Math.sin(x * band.freq + t * band.speed + band.phase) * band.amp
+      + Math.sin(x * band.freq * 2.3 - t * band.speed * 0.7 + band.phase) * band.amp2;
+  }
+
+  function auroraBands() {
+    return AURORA_BANDS;
+  }
+
+  function drawAurora(ts, w) {
+    const t = ts / 1000;
+    const bands = auroraBands();
+    bgCtx.save();
+    bgCtx.beginPath();
+    bgCtx.rect(0, CONTENT_TOP, w, CONTENT_H);
+    bgCtx.clip();
+    bgCtx.globalCompositeOperation = "lighter";
+
+    for (const b of bands) {
+      bgCtx.fillStyle = b.grad;
+      bgCtx.beginPath();
+      for (let x = -20; x <= w + 20; x += 16) {
+        const y = bandY(x, b, t);
+        if (x === -20) bgCtx.moveTo(x, y); else bgCtx.lineTo(x, y);
+      }
+      for (let x = w + 20; x >= -20; x -= 16) {
+        bgCtx.lineTo(x, bandY(x, b, t) + b.thick);
+      }
+      bgCtx.closePath();
+      bgCtx.fill();
+    }
+
+    // Two thin filaments with a travelling pulse.
+    for (let i = 0; i < 2; i++) {
+      const b = bands[i === 0 ? 1 : 2];
+      bgCtx.strokeStyle = "rgba(230,120,110,0.42)";
+      bgCtx.lineWidth = 1.2;
+      bgCtx.beginPath();
+      for (let x = -20; x <= w + 20; x += 16) {
+        const y = bandY(x, b, t);
+        if (x === -20) bgCtx.moveTo(x, y); else bgCtx.lineTo(x, y);
+      }
+      bgCtx.stroke();
+
+      const px = ((t * (i === 0 ? 42 : 29) + i * 560) % (w + 260)) - 130;
+      const py = bandY(px, b, t);
+      const glow = bgCtx.createRadialGradient(px, py, 0, px, py, 17);
+      glow.addColorStop(0, "rgba(255,170,150,0.55)");
+      glow.addColorStop(0.35, "rgba(220,80,80,0.20)");
+      glow.addColorStop(1, "rgba(178,34,34,0)");
+      bgCtx.fillStyle = glow;
+      bgCtx.beginPath();
+      bgCtx.arc(px, py, 17, 0, TAU);
+      bgCtx.fill();
+    }
+
+    // Fine dust drifting through the bands.
+    for (const d of dust) {
+      const a = 0.14 + 0.20 * (0.5 + 0.5 * Math.sin(ts / 1100 + d.a));
+      bgCtx.strokeStyle = d.red
+        ? "rgba(178,34,34," + (a * 0.8).toFixed(3) + ")"
+        : "rgba(200,200,200," + a.toFixed(3) + ")";
+      bgCtx.lineWidth = 1;
+      bgCtx.beginPath();
+      bgCtx.moveTo(d.x, d.y);
+      bgCtx.lineTo(d.x + d.len, d.y);
+      bgCtx.stroke();
+      d.x -= d.v / 8;
+      if (d.x < -12) { d.x = w + 12; d.y = CONTENT_TOP + Math.random() * CONTENT_H; }
+    }
+
+    bgCtx.restore();
+    bgCtx.globalCompositeOperation = "source-over";
+  }
+
+  function drawComet(ts, w) {
+    if (!comet && ts > nextComet) {
+      comet = {
+        x: w * (0.55 + Math.random() * 0.35),
+        y: CONTENT_TOP + 14 + Math.random() * CONTENT_H * 0.45,
+        dx: -(240 + Math.random() * 120),
+        dy: 26 + Math.random() * 30,
+        start: ts
+      };
+      nextComet = ts + 9000 + Math.random() * 8000;
+    }
+    if (!comet) return;
+    const k = (ts - comet.start) / 1200;
+    if (k >= 1) { comet = null; return; }
+    const hx = comet.x + k * comet.dx;
+    const hy = comet.y + k * comet.dy;
+    for (let i = 0; i < 3; i++) {
+      const f = 0.22 - i * 0.055;
+      bgCtx.strokeStyle = "rgba(235,235,235," + (0.6 * (1 - k) * (1 - i * 0.25)).toFixed(3) + ")";
+      bgCtx.lineWidth = 1.4 - i * 0.35;
+      bgCtx.beginPath();
+      bgCtx.moveTo(hx - comet.dx * f, hy - comet.dy * f);
+      bgCtx.lineTo(hx, hy);
+      bgCtx.stroke();
+    }
+    bgCtx.fillStyle = "rgba(255,230,220," + (0.9 * (1 - k)).toFixed(3) + ")";
+    bgCtx.beginPath();
+    bgCtx.arc(hx, hy, 1.6, 0, TAU);
+    bgCtx.fill();
+  }
+
+  function bgDraw(ts) {
+    const w = bgCanvas.clientWidth || 1280;
+    const h = bgCanvas.clientHeight || 400;
+    bgCtx.clearRect(0, 0, w, h);
+    drawStars(ts, w, h);
+    if (document.body.dataset.page === "ss") {
+      drawAurora(ts, w);
+      drawComet(ts, w);
+    }
+  }
+
+  function bgFrame(ts) {
+    const gate = document.body.dataset.page === "ss" ? 125 : 160;
+    if (ts - bgLastFrame < gate) { bgRAF = requestAnimationFrame(bgFrame); return; }
+    bgLastFrame = ts;
+    bgDraw(ts);
+    bgRAF = requestAnimationFrame(bgFrame);
+  }
+
+  function startBg() {
+    if (bgRAF) return;
+    bgResize();
+    bgLastFrame = 0;
+    bgRAF = requestAnimationFrame(bgFrame);
+  }
+
+  window.addEventListener("resize", bgResize);
+
+  const PAGES = [
+    { key: "core", label: "CORE" },
+    { key: "ss", label: "SCREENSAVER" },
+  ];
+  const ROTATE_MS = 15000;
+  let pageIdx = 0, rotateTimer = null;
+
+  function setPage(i) {
+    pageIdx = (i + PAGES.length) % PAGES.length;
+    const page = PAGES[pageIdx];
+    document.body.dataset.page = page.key;
+    $("pager").textContent = (pageIdx + 1) + "/" + PAGES.length + " " + page.label;
+    $("ss-page").setAttribute("aria-hidden", page.key === "ss" ? "false" : "true");
+  }
+  function scheduleRotate() {
+    clearInterval(rotateTimer);
+    rotateTimer = setInterval(() => setPage(pageIdx + 1), ROTATE_MS);
+  }
+  $("prev").addEventListener("click", () => { setPage(pageIdx - 1); scheduleRotate(); });
+  $("next").addEventListener("click", () => { setPage(pageIdx + 1); scheduleRotate(); });
+  setPage(0);
+  startBg();
+  scheduleRotate();
+
+  function tick() {
+    const n = new Date(), t = timeParts(n);
+    $("clock").textContent = DAYS[n.getDay()].slice(0, 3) + " " + MONTHS[n.getMonth()].slice(0, 3) + " " + n.getDate() + " · " + t.h + ":" + t.mm + ":" + t.ss + " " + t.ap;
+    $("ss-time").textContent = t.h + ":" + t.mm;
+    $("ss-sec").textContent = ":" + t.ss;
+    $("ss-ampm").textContent = t.ap;
+    $("ss-date").textContent = DAYS[n.getDay()] + ", " + MONTHS[n.getMonth()] + " " + n.getDate();
+    if (liveData) { applyLive(liveData); document.title = "hb:" + Date.now(); return; }
+    state.cpu = walk(state.cpu, 6, 12, 68);
+    state.load = walk(state.load, 0.08, 0.12, 1.2);
+    state.ram = walk(state.ram, 0.08, 1.5, 3.4);
+    state.swap = walk(state.swap, 4, 80, 220);
+    state.arc = walk(state.arc, 0.02, 0.9, 1.6);
+    state.down = walk(state.down, 12, 30, 145);
+    state.up = walk(state.up, 3, 4, 28);
+    state.rootfs = walk(state.rootfs, 0.02, 40, 46);
+    state.uptime += 1;
+
+    $("cpu-pct").textContent = state.cpu.toFixed(1) + "%";
+    $("load").innerHTML = [state.load, state.load * 1.2, state.load * 1.4]
+      .map(v => v.toFixed(2)).join("&nbsp;&nbsp;");
+    $("ram").textContent = state.ram.toFixed(1) + "G / 7.8G";
+    $("ram-pct").textContent = Math.round(state.ram / 7.8 * 100) + "%";
+    $("swap").textContent = Math.round(state.swap) + "M / 512M";
+    $("swap-pct").textContent = Math.round(state.swap / 512 * 100) + "%";
+    $("arc").textContent = state.arc.toFixed(1) + "G";
+    $("down").textContent = state.down.toFixed(1);
+    $("up").textContent = state.up.toFixed(1);
+    $("rootfs").textContent = state.rootfs.toFixed(0) + "G / 128G";
+    $("rootfs-pct").textContent = Math.round(state.rootfs / 128 * 100) + "%";
+    const d = Math.floor(state.uptime / 86400);
+    const h = Math.floor((state.uptime % 86400) / 3600);
+    const m = Math.floor((state.uptime % 3600) / 60);
+    $("uptime").textContent = d + "d " + String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+
+    $("ss-health").textContent = Math.round(state.cpu) + "% CPU · " + Math.round(state.ram / 7.8 * 100) + "% MEM";
+    sparks.forEach(renderSpark);
+    document.title = "hb:" + Date.now();
+  }
+
+  tick();
+  setInterval(tick, 1000);
+  setInterval(async () => {
+    try {
+      const r = await fetch("/api/snapshot", { cache: "no-store" });
+      const j = await r.json();
+      liveData = j; applyLive(j);
+    } catch (e) { /* keep the local stub */ }
+  }, 1000);
+})();
+</script>
+</body>
+</html>

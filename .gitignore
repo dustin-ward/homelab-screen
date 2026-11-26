@@ -1,0 +1,22 @@
+# Scratch notes and working captures are not source; published screenshots are.
+.scratch/
+*.png
+!docs/screenshots/
+!docs/screenshots/*.png
+
+# Python / editor noise
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Earlier one-off prototypes are not current source.
+prototypes/core-mock.html
+prototypes/kiosk-stub.html
+prototypes/served-kiosk.html
+
+# Secrets never belong in this repo. The live PVE token lives on the Pi at
+# ~/.config/homelab-screen/pve-token with mode 600.
+*.token
+pve-token
+*.key
+config.env

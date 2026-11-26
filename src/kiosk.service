@@ -1,0 +1,27 @@
+[Unit]
+Description=homelab-screen fullscreen kiosk
+After=network-online.target collector.service
+Wants=network-online.target collector.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=__KIOSK_USER__
+PAMName=login
+TTYPath=/dev/tty1
+WorkingDirectory=%h
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=XDG_SESSION_TYPE=wayland
+Environment=WLR_BACKENDS=drm,libinput
+Environment=WLR_RENDERER=gles2
+Environment=LIBSEAT_BACKEND=logind
+ExecStart=__PREFIX__/bin/kiosk.sh
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

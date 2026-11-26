@@ -1,0 +1,18 @@
+[Unit]
+Description=homelab-screen snapshot collector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-__CONFIG_DIR__/config.env
+User=__KIOSK_USER__
+WorkingDirectory=__APP_DIR__
+ExecStart=/usr/bin/python3 __APP_DIR__/collector.py
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
