@@ -107,7 +107,7 @@ do_backup() {
   stamp=$(date -u +%Y%m%dT%H%M%SZ)
   backup="$APP_DIR/backups/$stamp"
   run_root install -d -m 0755 "$backup"
-  for f in kiosk.html collector.py VERSION; do
+  for f in kiosk.html collector.py media.py VERSION; do
     [ -f "$APP_DIR/$f" ] && run_root cp -p "$APP_DIR/$f" "$backup/$f"
   done
   for u in kiosk.service collector.service; do
@@ -124,6 +124,7 @@ do_install() {
 
   run_root install -m 0644 "$ROOT/src/kiosk.html" "$APP_DIR/kiosk.html"
   run_root install -m 0644 "$ROOT/src/collector.py" "$APP_DIR/collector.py"
+  run_root install -m 0644 "$ROOT/src/media.py" "$APP_DIR/media.py"
   run_root install -d -m 0755 "$PREFIX/bin"
   run_root install -m 0755 "$ROOT/src/kiosk.sh" "$PREFIX/bin/kiosk.sh"
   run_root install -d -m 0755 "$CONFIG_DIR"
@@ -181,7 +182,7 @@ do_rollback() {
   fi
   [ -d "$target" ] || fail "backup not found: $target"
 
-  for f in kiosk.html collector.py VERSION; do
+  for f in kiosk.html collector.py media.py VERSION; do
     [ -f "$target/$f" ] && run_root install -m 0644 "$target/$f" "$APP_DIR/$f"
   done
   for u in kiosk.service collector.service; do

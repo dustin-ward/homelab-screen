@@ -1,0 +1,10 @@
+{
+  "prowlarr": {
+    "health": [
+      {"source": "UpdateCheck", "type": "warning", "message": "New update is available: v3.1.0.5799"},
+      {"source": "IndexerProxyStatusCheck", "type": "error", "message": "All indexer proxies are unavailable due to failures"}
+    ],
+    "indexer": [],
+    "indexerstatus": []
+  }
+}

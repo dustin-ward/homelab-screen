@@ -135,6 +135,295 @@
   body[data-page="disk"] .panel.disk { grid-row: 1; }
   body[data-page="disk"] .panel.net { grid-row: 2; }
 
+  /* MEDIA page: one 1280x400 split into streaming, activity, and status. */
+  .media-page {
+    display: none;
+    position: relative;
+    z-index: 2;
+    grid-row: 2;
+    grid-template-columns: 32.5% 32.5% minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 40px;
+    gap: 6px;
+    min-height: 0;
+  }
+  body[data-page="media"] .grid { display: none; }
+  body[data-page="media"] .screensaver-page { display: none; }
+  body[data-page="media"] .media-page { display: grid; }
+  .media-panel {
+    position: relative;
+    background: rgba(0, 0, 0, .58);
+    border: 1px solid var(--border);
+    padding: 12px 10px 7px;
+    min-width: 0;
+    min-height: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+  .media-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    color: var(--dim);
+    font-size: 10px;
+    line-height: 13px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .media-head .media-count { color: var(--fg); }
+  .state-pill {
+    color: var(--dim);
+    border: 1px solid var(--border);
+    padding: 0 4px;
+    font-size: 9px;
+    line-height: 12px;
+    letter-spacing: 1px;
+  }
+  .state-pill.live { color: var(--ok); border-color: var(--ok); }
+  .state-pill.warn { color: var(--warn); border-color: var(--warn); }
+  .state-pill.error { color: var(--crit); border-color: var(--crit); }
+  .state-pill.setup, .state-pill.stub { color: var(--dim); }
+
+  .stream-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .stream {
+    border-left: 2px solid var(--accent);
+    padding-left: 6px;
+    min-width: 0;
+  }
+  .stream-main {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .stream-user {
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stream-method {
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: .5px;
+  }
+  .stream-rate {
+    margin-left: auto;
+    color: var(--fg);
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .stream-title {
+    color: var(--fg);
+    font-size: 12px;
+    line-height: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stream-client {
+    color: var(--dim);
+    font-size: 9px;
+    line-height: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stream-more {
+    margin-top: auto;
+    padding-top: 4px;
+    color: var(--dim);
+    font-size: 9px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .media-empty {
+    color: var(--dim);
+    font-size: 10px;
+    line-height: 14px;
+    margin-top: 8px;
+  }
+
+  .act-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .act-name {
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .act-rate {
+    margin-left: auto;
+    color: var(--fg);
+    font-size: 21px;
+    line-height: 23px;
+  }
+  .act-item {
+    margin-top: 4px;
+    color: var(--fg);
+    font-size: 11px;
+    line-height: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .act-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 1px;
+    color: var(--dim);
+    font-size: 10px;
+    line-height: 13px;
+    white-space: nowrap;
+  }
+  .act-bar {
+    margin-top: 2px;
+    color: var(--fg);
+    font-size: 11px;
+    line-height: 14px;
+    white-space: pre;
+    overflow: hidden;
+  }
+  .act-secondary {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 4px;
+    color: var(--dim);
+    font-size: 10px;
+    line-height: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .act-foot {
+    color: var(--dim);
+    font-size: 9px;
+    line-height: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .err-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .err-row {
+    display: grid;
+    grid-template-columns: 6px 90px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 0;
+    border-bottom: 1px dotted #2c2c2c;
+    min-width: 0;
+    font-size: 10px;
+    line-height: 12px;
+  }
+  .err-row:last-child { border-bottom: 0; }
+  .err-dot { width: 6px; height: 6px; background: var(--dim); }
+  .err-dot.ok { background: var(--ok); }
+  .err-dot.warn { background: var(--warn); }
+  .err-dot.error { background: var(--crit); }
+  .err-dot.setup { background: var(--dim); }
+  .err-name {
+    color: var(--fg);
+    font-weight: 700;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .err-detail {
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .err-new {
+    color: var(--warn);
+    font-size: 9px;
+    line-height: 11px;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+
+  .media-strip {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, .58);
+    overflow: hidden;
+  }
+  .strip-title {
+    color: var(--accent);
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .strip-items {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .strip-item {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+    max-width: 34%;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .strip-source {
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: .5px;
+  }
+  .strip-name {
+    color: var(--fg);
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .strip-age { color: var(--dim); font-size: 9px; }
+  .media-mode {
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 9px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .media-mode.live { color: var(--ok); }
+  .media-mode.partial { color: var(--warn); }
+  .media-mode.stub { color: var(--dim); }
+
   /* Screensaver page: deep-field aurora, part of the rotation. */
   .screensaver-page {
     display: none;
@@ -238,6 +527,46 @@
     </article>
   </section>
 
+  <section class="media-page" id="m-page" aria-hidden="true">
+    <article class="media-panel">
+      <div class="panel-title">STREAMING</div>
+      <div class="media-head">
+        <span class="media-count" id="m-stream-count">0 STREAMING</span>
+        <span class="state-pill stub" id="m-stream-state">STUB</span>
+      </div>
+      <div class="stream-list" id="m-stream-list"></div>
+      <div class="stream-more" id="m-stream-more"></div>
+    </article>
+
+    <article class="media-panel">
+      <div class="panel-title">ACTIVITY</div>
+      <div class="act-head">
+        <span class="act-name" id="m-act-name">ACTIVITY</span>
+        <span class="act-rate" id="m-act-rate">0 B/s</span>
+      </div>
+      <div class="act-item" id="m-act-item">NO ACTIVE DOWNLOADS</div>
+      <div class="act-meta">
+        <span id="m-act-pct">--</span>
+        <span id="m-act-eta">--</span>
+        <span id="m-act-state">IDLE</span>
+      </div>
+      <div class="act-bar" id="m-act-bar">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</div>
+      <div class="act-secondary" id="m-act-secondary"></div>
+      <div class="act-foot" id="m-act-foot"></div>
+    </article>
+
+    <article class="media-panel">
+      <div class="panel-title">ERRORS / STATUS</div>
+      <div class="err-list" id="m-err-list"></div>
+    </article>
+
+    <div class="media-strip">
+      <span class="strip-title">LATEST</span>
+      <div class="strip-items" id="m-latest-list"></div>
+      <span class="media-mode stub" id="m-media-mode">MEDIA STUB</span>
+    </div>
+  </section>
+
   <section class="screensaver-page" id="ss-page" aria-hidden="true">
     <div class="ss-hud">
       <div class="ss-kicker" id="ss-kicker">HOMELAB // DEEP FIELD</div>
@@ -255,7 +584,7 @@
 
   <footer class="bottombar">
     <button class="nav" id="prev" type="button" aria-label="Previous page">&#91;&#9664;&#93;</button>
-    <div class="page" id="pager">1/2 CORE</div>
+    <div class="page" id="pager">1/3 CORE</div>
     <button class="nav" id="next" type="button" aria-label="Next page">&#91;&#9654;&#93;</button>
     <div class="foot-right" id="auto-label">AUTO 15s</div>
   </footer>
@@ -305,6 +634,181 @@
     $("up-meta").textContent = "UP " + upText;
     $("ss-health").textContent = Math.round(j.cpu) + "% CPU · " +
       Math.round(j.ram / j.ram_total * 100) + "% MEM";
+  }
+
+  const MEDIA_STUB = {
+    mode: "stub",
+    streaming: {
+      state: "STUB", count: 3, more: 0,
+      sessions: [
+        { user: "VIEWER ONE", method: "DIRECT", rate_text: "8.2 Mb/s", title: "S02E05 · The Long Example", client: "Web · Chrome" },
+        { user: "VIEWER TWO", method: "TRANSCODE", rate_text: "3.1 Mb/s", title: "Example Movie", client: "Phone · Jellyfin" },
+        { user: "VIEWER THREE", method: "DIRECT", rate_text: "1.7 Mb/s", title: "S01E02 · Another Example", client: "TV · Android" }
+      ]
+    },
+    activity: {
+      primary: "qbittorrent",
+      sources: {
+        qbittorrent: { configured: false, state: "DL", rate_text: "18.4 Mb/s", count: 4, detail: "4 ACTIVE · FIREWALLED", item: { name: "SAMPLE.RELEASE.1080P", pct: 42, eta_text: "12m", state: "DL" } },
+        nzbget: { configured: false, state: "IDLE", rate_text: "0 B/s", count: 0, detail: "0 ACTIVE · 0 PP", item: null }
+      }
+    },
+    errors: {
+      sources: [
+        { key: "prowlarr", name: "PROWLARR", state: "STUB", new: 0, detail: "AWAITING MEDIA CREDENTIALS" },
+        { key: "sonarr", name: "SONARR", state: "STUB", new: 0, detail: "AWAITING MEDIA CREDENTIALS" },
+        { key: "radarr", name: "RADARR", state: "STUB", new: 0, detail: "AWAITING MEDIA CREDENTIALS" },
+        { key: "nzbget", name: "NZBGET", state: "STUB", new: 0, detail: "AWAITING MEDIA CREDENTIALS" },
+        { key: "qbittorrent", name: "QBITTORRENT", state: "STUB", new: 0, detail: "AWAITING MEDIA CREDENTIALS" }
+      ]
+    },
+    latest: {
+      items: [
+        { source: "SONARR", title: "Example Series · S02E05 · The Long Example", at: new Date(Date.now() - 42 * 60000).toISOString() },
+        { source: "RADARR", title: "Example Movie (2024)", at: new Date(Date.now() - 3 * 3600000).toISOString() },
+        { source: "SONARR", title: "Second Series · S01E02 · Another Example", at: new Date(Date.now() - 8 * 3600000).toISOString() }
+      ]
+    }
+  };
+
+  function mediaSet(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value == null ? "" : String(value);
+  }
+
+  function mediaNode(tag, cls, value) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (value != null) el.textContent = String(value);
+    return el;
+  }
+
+  function mediaStateClass(value) {
+    const state = String(value || "").toUpperCase();
+    if (state === "LIVE" || state === "OK") return "live";
+    if (state === "WARN" || state === "PAUSED" || state === "STALLED") return "warn";
+    if (state === "ERROR" || state === "AUTH" || state === "OFF" || state === "OFFLINE" || state === "TIMEOUT") return "error";
+    return "setup";
+  }
+
+  function mediaPill(id, value) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = value || "STUB";
+    el.className = "state-pill " + mediaStateClass(value);
+  }
+
+  function mediaAge(value) {
+    const stamp = Date.parse(value);
+    if (!Number.isFinite(stamp)) return "";
+    const seconds = Math.max(0, (Date.now() - stamp) / 1000);
+    if (seconds < 60) return "NOW";
+    if (seconds < 3600) return Math.floor(seconds / 60) + "m";
+    if (seconds < 86400) return Math.floor(seconds / 3600) + "h";
+    return Math.floor(seconds / 86400) + "d";
+  }
+
+  function applyMedia(j) {
+    if (!j || typeof j !== "object") return;
+    const stream = j.streaming || {};
+    const sessions = Array.isArray(stream.sessions) ? stream.sessions : [];
+    mediaSet("m-stream-count", (stream.count || 0) + " STREAMING");
+    mediaPill("m-stream-state", stream.state || "STUB");
+    const streamList = $("m-stream-list");
+    streamList.replaceChildren();
+    sessions.forEach(s => {
+      const row = mediaNode("div", "stream");
+      const main = mediaNode("div", "stream-main");
+      main.append(
+        mediaNode("span", "stream-user", s.user || "UNKNOWN"),
+        mediaNode("span", "stream-method", s.method || "PLAY"),
+        mediaNode("span", "stream-rate", s.rate_text || "0 B/s")
+      );
+      row.append(
+        main,
+        mediaNode("div", "stream-title", s.title || "Untitled"),
+        mediaNode("div", "stream-client", s.client || "PLAYER")
+      );
+      streamList.append(row);
+    });
+    if (!sessions.length) {
+      streamList.append(mediaNode(
+        "div", "media-empty",
+        stream.configured ? "NO ACTIVE STREAMS" : "JELLYFIN NOT CONFIGURED"
+      ));
+    }
+    mediaSet("m-stream-more", stream.more ? "+" + stream.more + " MORE" : "");
+
+    const activity = j.activity || {};
+    const sources = activity.sources || {};
+    const primary = activity.primary || "idle";
+    const source = sources[primary];
+    if (!source || primary === "idle") {
+      mediaSet("m-act-name", "IDLE");
+      mediaSet("m-act-rate", "0 B/s");
+      mediaSet("m-act-item", "NO ACTIVE DOWNLOADS");
+      mediaSet("m-act-pct", "--");
+      mediaSet("m-act-eta", "--");
+      mediaSet("m-act-state", "IDLE");
+      $("m-act-bar").textContent = bar(0);
+      mediaSet("m-act-secondary", "QBITTORRENT + NZBGET · IDLE");
+      mediaSet("m-act-foot", "BOTH DOWNLOADERS IDLE");
+    } else {
+      const item = source.item || {};
+      const name = primary === "nzbget" ? "NZBGET" : "QBITTORRENT";
+      const otherKey = primary === "nzbget" ? "qbittorrent" : "nzbget";
+      const other = sources[otherKey] || {};
+      const otherName = otherKey === "nzbget" ? "NZBGET" : "QBITTORRENT";
+      mediaSet("m-act-name", name);
+      mediaSet("m-act-rate", source.rate_text || "0 B/s");
+      mediaSet("m-act-item", item.name || (source.state === "PP" ? "POST-PROCESSING" : "NO ACTIVE DOWNLOADS"));
+      mediaSet("m-act-pct", item.pct != null ? item.pct + "%" : (source.state || "--"));
+      mediaSet("m-act-eta", item.eta_text || "--");
+      mediaSet("m-act-state", item.state || source.state || "IDLE");
+      $("m-act-bar").textContent = bar(item.pct != null ? item.pct : (source.state === "PP" ? 100 : 0));
+      mediaSet(
+        "m-act-secondary",
+        otherName + " · " + (other.rate_text || "0 B/s") + " · " + (other.count || 0) + " ACTIVE"
+      );
+      mediaSet("m-act-foot", source.detail || "");
+    }
+
+    const rows = (j.errors && j.errors.sources) || [];
+    const errList = $("m-err-list");
+    errList.replaceChildren();
+    rows.forEach(src => {
+      const row = mediaNode("div", "err-row");
+      const dot = mediaNode("span", "err-dot " + mediaStateClass(src.state));
+      const fresh = Number(src.new || 0);
+      row.append(
+        dot,
+        mediaNode("span", "err-name", src.name || src.key || ""),
+        mediaNode("span", "err-detail", src.detail || ""),
+        mediaNode("span", "err-new", fresh > 0 ? "NEW " + fresh : "")
+      );
+      errList.append(row);
+    });
+
+    const latest = (j.latest && j.latest.items) || [];
+    const latestList = $("m-latest-list");
+    latestList.replaceChildren();
+    latest.forEach(item => {
+      const row = mediaNode("div", "strip-item");
+      row.append(
+        mediaNode("span", "strip-source", item.source || ""),
+        mediaNode("span", "strip-name", item.title || ""),
+        mediaNode("span", "strip-age", mediaAge(item.at))
+      );
+      latestList.append(row);
+    });
+    if (!latest.length) {
+      latestList.append(mediaNode("span", "strip-age", "NO RECENT IMPORTS"));
+    }
+
+    const mode = j.mode === "live" || j.mode === "partial" ? j.mode : "stub";
+    const modeEl = $("m-media-mode");
+    modeEl.className = "media-mode " + mode;
+    modeEl.textContent = "MEDIA " + mode.toUpperCase() + (mode === "live" ? " · 15s" : "");
   }
 
   const sparks = [...document.querySelectorAll("[data-spark]")].map(el => ({
@@ -540,6 +1044,7 @@
 
   const PAGES = [
     { key: "core", label: "CORE" },
+    { key: "media", label: "MEDIA" },
     { key: "ss", label: "SCREENSAVER" },
   ];
   const ROTATE_MS = 15000;
@@ -551,6 +1056,7 @@
     document.body.dataset.page = page.key;
     $("pager").textContent = (pageIdx + 1) + "/" + PAGES.length + " " + page.label;
     $("ss-page").setAttribute("aria-hidden", page.key === "ss" ? "false" : "true");
+    $("m-page").setAttribute("aria-hidden", page.key === "media" ? "false" : "true");
   }
   function scheduleRotate() {
     clearInterval(rotateTimer);
@@ -558,9 +1064,28 @@
   }
   $("prev").addEventListener("click", () => { setPage(pageIdx - 1); scheduleRotate(); });
   $("next").addEventListener("click", () => { setPage(pageIdx + 1); scheduleRotate(); });
-  setPage(0);
+  applyMedia(MEDIA_STUB);
+  const requestedPage = new URLSearchParams(location.search).get("page");
+  const requestedIdx = PAGES.findIndex(page => page.key === requestedPage);
+  setPage(requestedIdx >= 0 ? requestedIdx : 0);
   startBg();
   scheduleRotate();
+
+  async function refreshMedia() {
+    try {
+      const response = await fetch("/api/media", { cache: "no-store" });
+      if (!response.ok) throw new Error("media unavailable");
+      applyMedia(await response.json());
+    } catch (e) {
+      const modeEl = $("m-media-mode");
+      if (modeEl) {
+        modeEl.className = "media-mode stub";
+        modeEl.textContent = "MEDIA OFFLINE";
+      }
+    }
+  }
+  refreshMedia();
+  setInterval(refreshMedia, 1000);
 
   function tick() {
     const n = new Date(), t = timeParts(n);

@@ -18,6 +18,8 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from media import MediaService
+
 # Deployment-specific values come from the environment / config file.
 # No hostname, address, username or credential is stored in the source tree.
 def env_path(name, default):
@@ -39,6 +41,7 @@ PORT = int(os.environ.get("HOMELAB_PORT", "8080"))
 BLOCKS = "▁▂▃▄▅▆▇█"
 SPARK_LEN = {"cpu": 60, "ram": 40, "down": 60, "up": 60,
              "read": 40, "write": 40}
+MEDIA = MediaService(CONFIG_HOME)
 
 
 def read_version():
@@ -232,10 +235,13 @@ def snapshot():
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path.startswith("/api/snapshot"):
+        if self.path.startswith("/api/media"):
+            body = json.dumps(MEDIA.snapshot()).encode()
+            ctype = "application/json"
+        elif self.path.startswith("/api/snapshot"):
             body = json.dumps(snapshot()).encode()
             ctype = "application/json"
-        elif self.path in ("/", "/kiosk.html"):
+        elif self.path in ("/", "/kiosk.html") or self.path.startswith("/?"):
             body = PAGE_FILE.read_bytes()
             ctype = "text/html; charset=utf-8"
         else:
@@ -265,6 +271,7 @@ def main():
     init_state()
     threading.Thread(target=loop, args=(stub_tick, 1), daemon=True).start()
     threading.Thread(target=loop, args=(live_tick, 5), daemon=True).start()
+    threading.Thread(target=loop, args=(MEDIA.tick, 1), daemon=True).start()
     server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     server.serve_forever()
 

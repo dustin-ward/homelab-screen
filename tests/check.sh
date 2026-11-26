@@ -10,7 +10,10 @@ trap 'rm -rf "$TMP"; [ -n "$PID" ] && kill "$PID" 2>/dev/null || true' EXIT
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
 echo "== python syntax =="
-python3 -m py_compile "$ROOT/src/collector.py"
+python3 -m py_compile "$ROOT/src/collector.py" "$ROOT/src/media.py"
+
+echo "== media fixture snapshot =="
+python3 "$ROOT/tests/media_check.py"
 
 echo "== inline JS syntax =="
 python3 - "$ROOT/src/kiosk.html" "$TMP/kiosk.js" <<'PY'
@@ -93,6 +96,34 @@ assert expected <= set(data["sparks"]), data["sparks"].keys()
 assert "load" not in data["sparks"], data["sparks"].keys()
 assert "total" not in data["sparks"], data["sparks"].keys()
 print("stub snapshot OK; ticks advancing")
+PY
+
+echo "== media endpoint smoke test =="
+python3 - "$HOMELAB_PORT" <<'PY'
+import json
+import sys
+import time
+import urllib.request
+
+port = int(sys.argv[1])
+url = f"http://127.0.0.1:{port}/api/media"
+for _ in range(50):
+    try:
+        with urllib.request.urlopen(url, timeout=0.5) as response:
+            data = json.load(response)
+        break
+    except Exception:
+        time.sleep(0.1)
+else:
+    raise SystemExit("collector media endpoint did not start")
+
+assert data["mode"] == "stub", data
+assert [row["key"] for row in data["errors"]["sources"]] == [
+    "prowlarr", "sonarr", "radarr", "nzbget", "qbittorrent"
+], data["errors"]["sources"]
+assert data["streaming"]["count"] == 3, data["streaming"]
+assert data["activity"]["primary"] == "qbittorrent", data["activity"]
+print("media endpoint OK")
 PY
 
 echo "ALL CHECKS PASSED"

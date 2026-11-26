@@ -1,0 +1,22 @@
+{
+  "qbittorrent": {
+    "transfer": {"connection_status": "connected", "dl_info_speed": 20000000},
+    "torrents": [
+      {"hash": "q1", "name": "QB.RELEASE.1080p", "state": "downloading", "progress": 0.31, "eta": 600}
+    ],
+    "errored": []
+  },
+  "nzbget": {
+    "status": {
+      "DownloadRateLo": 0,
+      "DownloadRateHi": 0,
+      "FreeDiskSpaceMB": 120000,
+      "PostJobCount": 0,
+      "DownloadPaused": false,
+      "ServerStandBy": false
+    },
+    "listgroups": [],
+    "systemhealth": {"Alerts": [], "Sections": []},
+    "log": []
+  }
+}
