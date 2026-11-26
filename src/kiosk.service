@@ -9,8 +9,8 @@ Type=simple
 User=__KIOSK_USER__
 PAMName=login
 TTYPath=/dev/tty1
-WorkingDirectory=%h
-Environment=XDG_RUNTIME_DIR=/run/user/%U
+WorkingDirectory=__USER_HOME__
+Environment=XDG_RUNTIME_DIR=/run/user/__USER_UID__
 Environment=XDG_SESSION_TYPE=wayland
 Environment=WLR_BACKENDS=drm,libinput
 Environment=WLR_RENDERER=gles2

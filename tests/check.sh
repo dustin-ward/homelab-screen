@@ -35,6 +35,11 @@ if git -C "$ROOT" grep -I -n -iE 'black''forest|192\.168\.|/home/dwa''rd|dwa''rd
   fail "identifying host/user/address found in tracked files"
 fi
 
+echo "== unit specifiers =="
+if grep -nE '%[hU]' "$ROOT"/src/*.service; then
+  fail "systemd %h/%U resolve against the manager user, not User="
+fi
+
 echo "== stub snapshot smoke test =="
 export HOMELAB_CONFIG_HOME="$TMP/config"
 export HOMELAB_APP_HOME="$TMP/app"

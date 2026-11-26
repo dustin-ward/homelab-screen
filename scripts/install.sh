@@ -56,6 +56,7 @@ done
 [ -n "$USER_NAME" ] || USER_NAME=$(id -un)
 USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 [ -n "$USER_HOME" ] || USER_HOME=$HOME
+USER_UID=$(id -u "$USER_NAME")
 [ -n "$APP_DIR" ] || APP_DIR=$USER_HOME/homelab-screen
 
 SUDO=
@@ -75,7 +76,9 @@ render() {
   sed -e "s|__KIOSK_USER__|$USER_NAME|g" \
       -e "s|__PREFIX__|$PREFIX|g" \
       -e "s|__CONFIG_DIR__|$CONFIG_DIR|g" \
-      -e "s|__APP_DIR__|$APP_DIR|g" "$1" > "$2"
+      -e "s|__APP_DIR__|$APP_DIR|g" \
+      -e "s|__USER_HOME__|$USER_HOME|g" \
+      -e "s|__USER_UID__|$USER_UID|g" "$1" > "$2"
 }
 
 config_value() {
