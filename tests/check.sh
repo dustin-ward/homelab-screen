@@ -63,11 +63,16 @@ else:
 
 assert data["mode"] == "stub", data
 assert data["host"] == "HOMELAB", data
+first = data
+time.sleep(1.2)
+with urllib.request.urlopen(url, timeout=0.5) as response:
+    data = json.load(response)
+assert data["uptime"] > first["uptime"], (first["uptime"], data["uptime"])
 expected = {"cpu", "ram", "down", "up", "read", "write"}
 assert expected <= set(data["sparks"]), data["sparks"].keys()
 assert "load" not in data["sparks"], data["sparks"].keys()
 assert "total" not in data["sparks"], data["sparks"].keys()
-print("stub snapshot OK")
+print("stub snapshot OK; ticks advancing")
 PY
 
 echo "ALL CHECKS PASSED"

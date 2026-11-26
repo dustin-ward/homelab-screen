@@ -9,6 +9,7 @@ CONFIG_DIR=/etc/homelab-screen
 UNIT_DIR=/etc/systemd/system
 APP_DIR=
 USER_NAME=
+VERSION_OVERRIDE=
 ALLOW_STUB=0
 ACTION=install
 ROLLBACK_TAG=
@@ -24,6 +25,7 @@ Usage: scripts/install.sh [options]
   --app-dir DIR         installed source dir (default: USER_HOME/homelab-screen)
   --rollback [TAG]      restore a timestamped backup, or the latest one
   --status              print installed version and service health
+  --version TEXT         version stamp to write (default: git commit)
   -h, --help            show this help
 EOF
 }
@@ -44,6 +46,7 @@ while [ $# -gt 0 ]; do
       else ROLLBACK_TAG=latest; fi
       ;;
     --status) ACTION=status ;;
+    --version) VERSION_OVERRIDE=$2; shift ;;
     -h|--help) usage; exit 0 ;;
     *) fail "unknown option: $1" ;;
   esac
@@ -153,7 +156,7 @@ do_install() {
   run_root install -m 0644 "$tmp/kiosk.service" "$UNIT_DIR/kiosk.service"
   run_root install -m 0644 "$tmp/collector.service" "$UNIT_DIR/collector.service"
 
-  commit=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)
+  commit=${VERSION_OVERRIDE:-$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)}
   printf '%s %s\n' "$commit" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp/VERSION"
   run_root install -m 0644 "$tmp/VERSION" "$APP_DIR/VERSION"
 

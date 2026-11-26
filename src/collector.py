@@ -20,17 +20,21 @@ from pathlib import Path
 
 # Deployment-specific values come from the environment / config file.
 # No hostname, address, username or credential is stored in the source tree.
-CONFIG_HOME = Path(os.environ.get("HOMELAB_CONFIG_HOME",
-                                  str(Path.home() / ".config/homelab-screen")))
-TOKEN_FILE = Path(os.environ.get("HOMELAB_TOKEN_FILE", str(CONFIG_HOME / "pve-token")))
-CERT_FILE = Path(os.environ.get("HOMELAB_CERT_FILE", str(CONFIG_HOME / "pve-cert.pem")))
-APP_HOME = Path(os.environ.get("HOMELAB_APP_HOME", str(Path.home() / "homelab-screen")))
-PAGE_FILE = Path(os.environ.get("HOMELAB_PAGE_FILE", str(APP_HOME / "kiosk.html")))
-VERSION_FILE = Path(os.environ.get("HOMELAB_VERSION_FILE", str(APP_HOME / "VERSION")))
+def env_path(name, default):
+    value = os.environ.get(name, "")
+    return Path(value) if value else Path(default)
+
+
+CONFIG_HOME = env_path("HOMELAB_CONFIG_HOME", Path.home() / ".config/homelab-screen")
+TOKEN_FILE = env_path("HOMELAB_TOKEN_FILE", CONFIG_HOME / "pve-token")
+CERT_FILE = env_path("HOMELAB_CERT_FILE", CONFIG_HOME / "pve-cert.pem")
+APP_HOME = env_path("HOMELAB_APP_HOME", Path.home() / "homelab-screen")
+PAGE_FILE = env_path("HOMELAB_PAGE_FILE", APP_HOME / "kiosk.html")
+VERSION_FILE = env_path("HOMELAB_VERSION_FILE", APP_HOME / "VERSION")
 BASE = os.environ.get("PVE_API_BASE", "").rstrip("/")
 NODE = os.environ.get("PVE_NODE", "")
 CERT_PIN = os.environ.get("PVE_CERT_PIN", "").lower().replace(":", "")
-LABEL = os.environ.get("HOMELAB_LABEL", "HOMELAB")
+LABEL = os.environ.get("HOMELAB_LABEL", "") or "HOMELAB"
 PORT = int(os.environ.get("HOMELAB_PORT", "8080"))
 BLOCKS = "▁▂▃▄▅▆▇█"
 SPARK_LEN = {"cpu": 60, "ram": 40, "down": 60, "up": 60,
@@ -104,11 +108,9 @@ def stub_tick():
         s["rootfs"] = walk(s["rootfs"], 0.02, 40, 46)
         s["uptime"] += 1
         shift("cpu", s["cpu"] / 10)
-        shift("load", s["load"][0] * 5)
         shift("ram", s["ram"] * 2)
         shift("down", s["down"] / 20)
         shift("up", s["up"] / 4)
-        shift("total", (s["down"] + s["up"]) / 30)
         shift("read", random.randint(0, 7))
         shift("write", random.randint(0, 7))
 
@@ -252,7 +254,10 @@ class Handler(BaseHTTPRequestHandler):
 
 def loop(fn, delay):
     while True:
-        fn()
+        try:
+            fn()
+        except Exception as exc:
+            print(f"collector: {fn.__name__} failed: {exc}", file=sys.stderr)
         time.sleep(delay)
 
 
